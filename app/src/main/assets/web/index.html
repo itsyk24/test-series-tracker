@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="color-scheme" content="dark light">
+<title>Test Series Tracker</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main id="view" tabindex="-1"></main>
+
+<nav class="tabbar" role="tablist" aria-label="Sections">
+  <button class="tab" data-tab="today" role="tab" aria-label="Today">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg>
+    <span>Today</span>
+  </button>
+  <button class="tab" data-tab="plan" role="tab" aria-label="Plan">
+    <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 2.8v4M16 2.8v4"/></svg>
+    <span>Plan</span>
+  </button>
+  <button class="tab" data-tab="series" role="tab" aria-label="Series">
+    <svg viewBox="0 0 24 24"><path d="M12 3.5 21 8l-9 4.5L3 8z"/><path d="m3 12.2 9 4.5 9-4.5M3 16.4l9 4.5 9-4.5"/></svg>
+    <span>Series</span>
+  </button>
+  <button class="tab" data-tab="subjects" role="tab" aria-label="Subjects">
+    <svg viewBox="0 0 24 24"><path d="M4 4.5h6.5a2 2 0 0 1 2 2V20a1.6 1.6 0 0 0-1.6-1.6H4zM20 4.5h-6.5a2 2 0 0 0-2 2V20a1.6 1.6 0 0 1 1.6-1.6H20z"/></svg>
+    <span>Subjects</span>
+  </button>
+  <button class="tab" data-tab="progress" role="tab" aria-label="Progress">
+    <svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M6.5 17v-5M11 17V7M15.5 17v-7.5M20 17V4"/></svg>
+    <span>Progress</span>
+  </button>
+</nav>
+
+<div id="sheet-root"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file-in" accept="application/json,.json,text/plain" hidden>
+
+<script src="seed.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
