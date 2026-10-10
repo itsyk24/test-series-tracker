@@ -27,7 +27,7 @@ jobs:
 
       - name: Build signed release APK
         env:
-          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEYSTORE_PASS: "SJdLu0-SlTFJyjPSg5ustqXFwfkI5uBQ"
           KEYSTORE_PATH: ${{ github.workspace }}/app/release.jks
         run: gradle assembleRelease --no-daemon --stacktrace
 

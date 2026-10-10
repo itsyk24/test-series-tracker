@@ -6,4 +6,4 @@ Personal Android app for the ESE + GATE 2027 (Civil) test-series plan: Oct 10 â€
 - `app/src/main/java/.../MainActivity.java` â€” WebView shell; saves progress to the app's private storage and handles backup export/import.
 - Every push to `main` builds a signed APK (GitHub Actions) and publishes it as a Release.
 
-Progress lives on the phone (`files/state.json`) and survives updates because every build is signed with the same key (`app/release.jks`, password in the `KEYSTORE_PASS` secret). Keep using this repo for future versions; a build signed with a different key cannot update the installed app.
+Progress lives on the phone (`files/state.json`) and survives updates because every build is signed with the same key (`app/release.jks`, password set in `.github/workflows/build.yml`). Keep using this repo for future versions; a build signed with a different key cannot update the installed app.
