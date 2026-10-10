@@ -6,6 +6,8 @@
 const SERIES = [
   { k: 'G27', name: 'ACE GATE-27', short: 'GATE-27', ring: false },
   { k: 'G26', name: 'ACE GATE-26', short: 'GATE-26', ring: true },
+  { k: 'H27', name: 'MADE EASY GATE-27', short: 'ME GATE-27', ring: false },
+  { k: 'H26', name: 'MADE EASY GATE-26', short: 'ME GATE-26', ring: true },
   { k: 'A27', name: 'ACE ESE-27', short: 'ESE-27', ring: false },
   { k: 'A26', name: 'ACE ESE-26', short: 'ESE-26', ring: true },
   { k: 'M27', name: 'MADE EASY ESE-27', short: 'ME ESE-27', ring: false },
@@ -73,6 +75,13 @@ function loadState() {
   let st = null;
   try { const raw = store.load(); if (raw) st = JSON.parse(raw); } catch (e) { st = null; }
   if (!st || typeof st !== 'object' || !st.tests) st = freshState();
+  // plan update: tests you haven't touched follow the new plan; done, skipped or moved tests stay as they are
+  if ((st.seed || 0) < SEED.version && SEED.prev) {
+    for (const t of SEED.tests) {
+      const x = st.tests[t.id];
+      if (x && x.st === 'todo' && SEED.prev[t.id] && x.d === SEED.prev[t.id]) { x.d = t.d; x.o = t.o; }
+    }
+  }
   for (const t of SEED.tests) if (!st.tests[t.id]) st.tests[t.id] = { d: t.d, st: 'todo', o: t.o };
   st.seed = SEED.version;
   st.topics = st.topics || {};
@@ -86,7 +95,7 @@ const T = id => ({ ...SEEDMAP[id], ...S.tests[id] });
 const allTests = () => SEED.tests.map(t => T(t.id));
 function testsOn(date) { return allTests().filter(t => t.d === date).sort((a, b) => a.o - b.o); }
 function loadOf(date) { return testsOn(date).reduce((a, t) => a + t.h, 0); }
-function capOf(date) { return SEED.caps[date] ?? (isWeekend(date) ? 7.5 : 4); }
+function capOf(date) { return SEED.caps[date] ?? (isWeekend(date) ? 10 : 6.5); }
 function maxOrder() { return Math.max(...Object.values(S.tests).map(x => x.o || 0)); }
 function planDays() {
   const out = []; let d = SEED.start; const last = allTests().reduce((m, t) => t.d > m ? t.d : m, SEED.end);
@@ -327,7 +336,7 @@ function viewProgress() {
   const W = 340, Hc = 150, pl = 22, pb = 22, bw = (W - pl) / keys.length;
   const maxv = Math.max(...keys.map(k => weeks[k].p), 1), sc = v => (v / maxv) * (Hc - pb - 8);
   let svg = `<svg viewBox="0 0 ${W} ${Hc}" role="img" aria-label="Hours planned and done per week">`;
-  for (const g of [0, 20, 40]) { if (g > maxv) continue; const y = Hc - pb - sc(g); svg += `<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y + 3}">${g}</text>`; }
+  for (let g = 0; g <= maxv; g += 20) { const y = Hc - pb - sc(g); svg += `<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y + 3}">${g}</text>`; }
   keys.forEach((k, i) => {
     const x = pl + i * bw + bw * 0.18, w = bw * 0.64, p = weeks[k].p, dn = weeks[k].d;
     svg += `<rect x="${x}" y="${Hc - pb - sc(p)}" width="${w}" height="${sc(p)}" rx="2" fill="none" stroke="var(--line2)"/>`;
