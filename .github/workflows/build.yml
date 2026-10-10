@@ -19,8 +19,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
@@ -29,7 +27,11 @@ jobs:
         env:
           KEYSTORE_PASS: "SJdLu0-SlTFJyjPSg5ustqXFwfkI5uBQ"
           KEYSTORE_PATH: ${{ github.workspace }}/app/release.jks
-        run: gradle assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          echo "ANDROID_HOME=$ANDROID_HOME"; ls "$ANDROID_HOME/platforms" || true
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          gradle assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
 
       - name: Name the APK
         run: cp app/build/outputs/apk/release/app-release.apk "TestTracker-v1.0.${{ github.run_number }}.apk"
@@ -45,3 +47,16 @@ jobs:
           tag_name: v1.0.${{ github.run_number }}
           name: Test Tracker v1.0.${{ github.run_number }}
           files: TestTracker-v1.0.${{ github.run_number }}.apk
+
+      - name: Save build log on failure
+        if: failure()
+        run: |
+          [ -f build.log ] || echo "no gradle log (failed before build)" > build.log
+          git config user.name "build-bot"; git config user.email "build-bot@users.noreply.github.com"
+          cp build.log /tmp/build.log
+          git checkout --orphan build-logs
+          git rm -rfq . || true
+          cp /tmp/build.log build.log
+          git add build.log
+          git commit -m "Build log for run ${{ github.run_number }}"
+          git push -f origin build-logs
