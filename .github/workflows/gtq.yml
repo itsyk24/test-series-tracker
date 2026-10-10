@@ -1,0 +1,34 @@
+name: GTQ list
+on:
+  push:
+    branches: [gtq-scrape]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -U yt-dlp
+      - name: List channel videos, streams and playlists
+        run: |
+          mkdir -p out
+          C=https://www.youtube.com/@MADEEASYEducation
+          for tab in videos streams; do
+            yt-dlp --flat-playlist --ignore-errors --print "%(id)s\t%(title)s" "$C/$tab" > out/$tab.tsv 2> out/$tab.err || true
+          done
+          yt-dlp --flat-playlist --ignore-errors --print "%(id)s\t%(title)s" "$C/playlists" > out/playlists.tsv 2> out/playlists.err || true
+          grep -iE "gtq|through question" out/playlists.tsv | cut -f1 | while read p; do
+            yt-dlp --flat-playlist --ignore-errors --print "$p\t%(id)s\t%(title)s" "https://www.youtube.com/playlist?list=$p" >> out/pl_items.tsv 2>> out/pl.err || true
+          done
+          for y in 2021 2022 2023 2024 2025 2026 2027; do
+            yt-dlp --flat-playlist --ignore-errors --print "%(id)s\t%(title)s\t%(channel)s" "ytsearch150:GATE Through Questions GTQ GATE $y CE MADE EASY" >> out/search.tsv 2>> out/search.err || true
+          done
+          cat out/videos.tsv out/streams.tsv out/pl_items.tsv out/search.tsv 2>/dev/null | grep -iE "gtq|through question" > out/gtq_all.tsv || true
+          wc -l out/*
+      - name: Save
+        run: |
+          git config user.name "gtq-bot"; git config user.email "gtq-bot@users.noreply.github.com"
+          git add out; git commit -m "GTQ list output" || true
+          git push origin HEAD:gtq-scrape
