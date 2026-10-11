@@ -62,6 +62,7 @@ const fmtH = h => {
   return mm ? `${hh} h ${mm} min` : `${hh} h`;
 };
 const fmtHd = h => (Math.round(h * 10) / 10).toString().replace(/\.0$/, '');
+const fmtQ = h => (Math.round(h * 100) / 100).toString();   // quota, e.g. 3.75
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ---------- state ----------
@@ -95,7 +96,7 @@ const T = id => ({ ...SEEDMAP[id], ...S.tests[id] });
 const allTests = () => SEED.tests.map(t => T(t.id));
 function testsOn(date) { return allTests().filter(t => t.d === date).sort((a, b) => a.o - b.o); }
 function loadOf(date) { return testsOn(date).reduce((a, t) => a + t.h, 0); }
-function capOf(date) { return SEED.caps[date] ?? (isWeekend(date) ? 10 : 6.5); }
+function capOf(date) { return SEED.caps[date] ?? (isWeekend(date) ? 10 : 3.75); }
 function maxOrder() { return Math.max(...Object.values(S.tests).map(x => x.o || 0)); }
 function planDays() {
   const out = []; let d = SEED.start; const last = allTests().reduce((m, t) => t.d > m ? t.d : m, SEED.end);
@@ -206,7 +207,7 @@ function viewToday() {
   let h = `<section class="hero">
     <div class="row"><div><div class="weekday">${WDL[d.getDay()]}</div><div class="date">${d.getDate()} ${MOL[d.getMonth()]}</div></div>
     <div class="daycount">${dayCount}</div></div>
-    <div class="load-label"><span><b>${fmtHd(done)}</b> of ${fmtHd(load)} h done</span><span>Quota ${fmtHd(cap)} h</span></div>
+    <div class="load-label"><span><b>${fmtHd(done)}</b> of ${fmtHd(load)} h done</span><span>Quota ${fmtQ(cap)} h</span></div>
     ${scale(cap, load, done, { span: Math.max(cap, load, 1) })}
   </section>`;
 
@@ -233,7 +234,7 @@ function viewToday() {
 }
 
 function weekKey(s) { const d = parse(s); const g = (d.getDay() + 6) % 7; return addDays(s, -g); } // Monday
-function phaseOf(s) { return s <= '2026-11-08' ? 'Subject sweep' : s <= '2026-11-28' ? 'Integration' : 'Full-length papers'; }
+function phaseOf(s) { return s <= '2026-10-25' ? 'Subject sweep' : s <= '2026-12-06' ? 'Papers + subject tests' : 'Multi-subject tests + last mocks'; }
 
 function viewPlan() {
   const today = TODAY();
@@ -245,7 +246,7 @@ function viewPlan() {
   for (const w of weeks) {
     const tot = w.days.reduce((a, d) => a + loadOf(d), 0);
     const first = w.days[0], last = w.days[w.days.length - 1];
-    h += `<div class="week"><div class="week-h"><span><b>${fmtDM(first)} – ${fmtDM(last)}</b>   ${phaseOf(first)}</span><span>${fmtHd(tot)} h</span></div>`;
+    h += `<div class="week"><div class="week-h"><span><b>${first === last ? fmtDM(first) : `${fmtDM(first)} – ${fmtDM(last)}`}</b>   ${phaseOf(first)}</span><span>${fmtHd(tot)} h</span></div>`;
     for (const d of w.days) {
       const ts = testsOn(d), load = ts.reduce((a, t) => a + t.h, 0), cap = capOf(d);
       const done = ts.filter(t => t.st === 'done').reduce((a, t) => a + t.h, 0);
@@ -253,7 +254,7 @@ function viewPlan() {
       const cls = ['day']; if (d === today) cls.push('today'); else if (d < today) cls.push('past');
       h += `<div class="${cls.join(' ')}" data-date="${d}" id="day-${d}">
         <div class="day-h"><div class="dn">${dd.getDate()}</div><div class="dw">${WD[dd.getDay()]} ${MO[dd.getMonth()]}${d === today ? '  <i>Today</i>' : ''}${isWeekend(d) ? '' : ''}</div>
-        <div class="ld${load > cap + 0.15 ? ' over' : ''}">${fmtHd(load)} / ${fmtHd(cap)} h</div></div>
+        <div class="ld${load > cap + 0.15 ? ' over' : ''}">${fmtHd(load)} / ${fmtQ(cap)} h</div></div>
         ${scale(cap, load, done, { small: true, span: Math.max(cap, load, 1) })}
         <div class="dchips" style="margin-top:10px">${ts.length ? ts.map(t => `<button class="tchip${t.st === 'done' ? ' done' : ''}" data-chip="${t.id}">${dot(t.s)}<span>${esc(SER[t.s].short)} ${esc(t.n)}</span><span class="h">${fmtHd(t.h)}h</span></button>`).join('') : '<span class="hint">Free day. Drop a test here</span>'}</div>
       </div>`;
@@ -392,7 +393,7 @@ function testSheetHtml(id) {
     const d = addDays(start, i);
     if (d > '2026-12-31') break;
     const ld = loadOf(d) + (d === t.d ? 0 : t.h), cap = capOf(d), dd = parse(d);
-    picks += `<button class="dpick${d === t.d ? ' cur' : ''}${d < t.act ? ' no' : ''}${ld > cap + 0.15 ? ' heavy' : ''}" data-move="${d}"><small>${WD[dd.getDay()]}</small><b>${dd.getDate()}</b><em>${fmtHd(loadOf(d))}/${fmtHd(cap)}h</em></button>`;
+    picks += `<button class="dpick${d === t.d ? ' cur' : ''}${d < t.act ? ' no' : ''}${ld > cap + 0.15 ? ' heavy' : ''}" data-move="${d}"><small>${WD[dd.getDay()]}</small><b>${dd.getDate()}</b><em>${fmtHd(loadOf(d))}/${fmtQ(cap)}h</em></button>`;
   }
   return `<div>${dot(t.s)} <span style="color:var(--muted);font-size:13px;font-weight:600;margin-left:6px">${esc(s.name)}</span></div>
     <h3 style="margin-top:8px">${esc(t.n)}</h3>
