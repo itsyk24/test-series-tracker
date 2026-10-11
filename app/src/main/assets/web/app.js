@@ -5,11 +5,9 @@
 // ---------- constants ----------
 const SERIES = [
   { k: 'G27', name: 'ACE GATE-27', short: 'GATE-27', ring: false },
-  { k: 'G26', name: 'ACE GATE-26', short: 'GATE-26', ring: true },
   { k: 'H27', name: 'MADE EASY GATE-27', short: 'ME GATE-27', ring: false },
   { k: 'H26', name: 'MADE EASY GATE-26', short: 'ME GATE-26', ring: true },
   { k: 'A27', name: 'ACE ESE-27', short: 'ESE-27', ring: false },
-  { k: 'A26', name: 'ACE ESE-26', short: 'ESE-26', ring: true },
   { k: 'M27', name: 'MADE EASY ESE-27', short: 'ME ESE-27', ring: false },
   { k: 'M26', name: 'MADE EASY ESE-26', short: 'ME ESE-26', ring: true },
 ];
@@ -83,6 +81,8 @@ function loadState() {
     }
   }
   for (const t of SEED.tests) if (!st.tests[t.id]) st.tests[t.id] = { d: t.d, st: 'todo', o: t.o };
+  // drop tests for series no longer in the plan (e.g. from an older backup)
+  for (const id of Object.keys(st.tests)) if (!SEEDMAP[id]) delete st.tests[id];
   st.seed = SEED.version;
   st.topics = st.topics || {};
   return st;
