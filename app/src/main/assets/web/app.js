@@ -4,12 +4,12 @@
 
 // ---------- constants ----------
 const SERIES = [
-  { k: 'G27', name: 'ACE GATE-27', short: 'GATE-27', ring: false },
-  { k: 'H27', name: 'MADE EASY GATE-27', short: 'ME GATE-27', ring: false },
-  { k: 'H26', name: 'MADE EASY GATE-26', short: 'ME GATE-26', ring: true },
-  { k: 'A27', name: 'ACE ESE-27', short: 'ESE-27', ring: false },
-  { k: 'M27', name: 'MADE EASY ESE-27', short: 'ME ESE-27', ring: false },
-  { k: 'M26', name: 'MADE EASY ESE-26', short: 'ME ESE-26', ring: true },
+  { k: 'G27', name: 'ACE GATE-27', short: 'ACE GATE-27', ring: false },
+  { k: 'H27', name: 'MADE EASY GATE-27', short: 'MADE EASY GATE-27', ring: false },
+  { k: 'H26', name: 'MADE EASY GATE-26', short: 'MADE EASY GATE-26', ring: true },
+  { k: 'A27', name: 'ACE ESE-27', short: 'ACE ESE-27', ring: false },
+  { k: 'M27', name: 'MADE EASY ESE-27', short: 'MADE EASY ESE-27', ring: false },
+  { k: 'M26', name: 'MADE EASY ESE-26', short: 'MADE EASY ESE-26', ring: true },
 ];
 const SER = Object.fromEntries(SERIES.map(s => [s.k, s]));
 const KIND = { subject: 'Subject test', grand: 'Subject grand test', multi: 'Multi-subject test', mock: 'Full-length paper', add: 'New-syllabus test' };
