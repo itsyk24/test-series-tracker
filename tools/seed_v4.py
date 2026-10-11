@@ -1,6 +1,6 @@
 import json, io, contextlib, datetime as dt, re, collections
 import os
-os.environ.setdefault('WD', '3.75'); os.environ.setdefault('P1', '10-25'); os.environ['OUT'] = 'plan_v4.json'
+os.environ.setdefault('WD', '3.75'); os.environ.setdefault('P1', '10-28'); os.environ['OUT'] = 'plan_v4.json'
 src = open('plan_v4.py').read()
 with contextlib.redirect_stdout(io.StringIO()):
     exec(src)
@@ -50,12 +50,13 @@ for o in days_l:
 t = 'A27-M6a'; tests.append(dict(id=t, s='A27', n=lab(t), h=2.0, act='2026-12-15', d='2026-12-16', o=order + 1, k='mock', sub=[], gs=[]))
 # previous (v2) planned dates for migration
 v1 = {}
-old = open('/home/claude/work/seed_v2_backup.js').read()
-for x in json.loads(old[old.index('=') + 1:].rstrip(';'))['tests']:
-    if x['s'] not in DROP: v1[x['id']] = x['d']
+for f in ('seed_v2_backup.js', 'seed_v3_backup.js'):   # dates from both earlier plans, so either install upgrades cleanly
+    old = open('/home/claude/work/' + f).read()
+    for x in json.loads(old[old.index('=') + 1:].rstrip(';'))['tests']:
+        if x['s'] not in DROP and x['d'] not in v1.setdefault(x['id'], []): v1[x['id']].append(x['d'])
 missing_in_v3 = [k for k in v1 if k not in {x['id'] for x in tests}]
 print('v2 ids not in v3:', missing_in_v3)
-seed = dict(version=3, start='2026-10-11', end='2026-12-16', tests=tests, rev=rev, caps={o['date']: o['cap'] for o in days_l}, prev=v1)
+seed = dict(version=4, start='2026-10-11', end='2026-12-16', tests=tests, rev=rev, caps={o['date']: o['cap'] for o in days_l}, prev=v1)
 open('/home/claude/examapp/web/seed.js', 'w').write('window.SEED=' + json.dumps(seed, ensure_ascii=False, separators=(',', ':')) + ';')
 json.dump(dict(rev=rev, days=days_l), open('plan_v4_rev.json', 'w'), indent=1)
 print(len(tests), round(sum(x['h'] for x in tests), 1), collections.Counter(x['s'] for x in tests))

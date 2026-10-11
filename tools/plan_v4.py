@@ -111,6 +111,7 @@ gs_stream = ['A27-T14','M27-S02','G27-T24','G27-T22','G27-T23','H27-T11','H27-T1
     'A27-T18','M27-S18','A26-T12','M26-S14','A27-T08','M27-S06','G27-T36','H27-T30','A26-T18','M26-S18','A27-T16','M27-S12','A26-T08','M26-S06',
     'A27-T20','M27-S10','G26-T36','H26-T30','A26-T16','M26-S12','A27-T22','M27-S20','A26-T20','M26-S10','A26-T22','M26-S20']
 blocks.insert(3, blocks.pop(11))   # Maths earlier: weightier than BM/Surveying, so those take the late slots
+_env = next(i for i, b in enumerate(blocks) if b[0] == 'Env'); blocks.insert(0, blocks.pop(_env))   # start with Environmental (user's choice)
 tech = [(t, k) for k, a, b, c in blocks for t in keep(a + b + c)]
 gs_stream = [t for t in keep(gs_stream) if t not in DONE_TODAY]
 th = sum(T[t]['hrs'] for t, _ in tech); gh = sum(T[t]['hrs'] for t in gs_stream)

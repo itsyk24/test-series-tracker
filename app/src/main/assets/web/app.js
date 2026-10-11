@@ -78,7 +78,8 @@ function loadState() {
   if ((st.seed || 0) < SEED.version && SEED.prev) {
     for (const t of SEED.tests) {
       const x = st.tests[t.id];
-      if (x && x.st === 'todo' && SEED.prev[t.id] && x.d === SEED.prev[t.id]) { x.d = t.d; x.o = t.o; }
+      const p = SEED.prev[t.id], was = Array.isArray(p) ? p : (p ? [p] : []);
+      if (x && x.st === 'todo' && was.includes(x.d)) { x.d = t.d; x.o = t.o; }
     }
   }
   for (const t of SEED.tests) if (!st.tests[t.id]) st.tests[t.id] = { d: t.d, st: 'todo', o: t.o };
@@ -234,7 +235,7 @@ function viewToday() {
 }
 
 function weekKey(s) { const d = parse(s); const g = (d.getDay() + 6) % 7; return addDays(s, -g); } // Monday
-function phaseOf(s) { return s <= '2026-10-25' ? 'Subject sweep' : s <= '2026-12-06' ? 'Papers + subject tests' : 'Multi-subject tests + last mocks'; }
+function phaseOf(s) { return s <= '2026-10-28' ? 'Subject sweep' : s <= '2026-12-06' ? 'Papers + subject tests' : 'Multi-subject tests + last mocks'; }
 
 function viewPlan() {
   const today = TODAY();
