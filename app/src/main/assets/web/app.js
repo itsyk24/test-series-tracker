@@ -173,11 +173,15 @@ function trow(t, showDate) {
 
 function parseRev(rev) {
   if (!rev) return [];
-  return rev.split(/\.\s(?=\*\*New|Recap:|GS:|Mock prep:|Rotation:|Buffer)/).map(seg => {
+  return rev.split(/\.\s(?=\*\*New|\*\*Revise|Recap:|Refresh:|GS:|Mock prep:|Rotation:|Buffer)/).map(seg => {
     seg = seg.replace(/\.$/, '');
     let m = seg.match(/^\*\*New — ([^:]+):\s*(.+?)\*\*$/);
     if (m) return { kind: 'New', title: m[1], det: m[2] };
-    m = seg.match(/^(Recap|GS|Mock prep|Rotation|Buffer day):\s*(.+)$/);
+    m = seg.match(/^\*\*Revise \(day (\d+) of (\d+)\) — ([^:*]+):\s*(.+?)\*\*$/);
+    if (m) return { kind: 'New', label: `Revise ${m[1]}/${m[2]}`, title: m[3], det: m[4] };
+    m = seg.match(/^\*\*Revise \(day (\d+) of (\d+)\) — ([^*]+)\*\*:\s*(.+)$/);
+    if (m) return { kind: 'New', label: `Revise ${m[1]}/${m[2]}`, title: m[3], det: m[4].replace(/^./, c => c.toUpperCase()) };
+    m = seg.match(/^(Recap|Refresh|GS|Mock prep|Rotation|Buffer day):\s*(.+)$/);
     if (m) return { kind: m[1] === 'Buffer day' ? 'Buffer' : m[1], title: m[2].replace(/, GS /, ' + GS: ') };
     return { kind: 'Note', title: seg.replace(/\*\*/g, '') };
   });
@@ -215,7 +219,7 @@ function viewToday() {
   if (rev.length || subj.length) {
     h += `<section class="section"><h2>Revise first</h2><div class="sheetbox rev">`;
     for (const r of rev) {
-      h += `<div class="item"><div class="kind ${r.kind === 'New' ? 'new' : ''}">${esc(r.kind)}</div><div class="what">${r.det ? `<b>${esc(r.title)}</b><span class="det">${esc(r.det)}</span>` : esc(r.title)}</div></div>`;
+      h += `<div class="item"><div class="kind ${r.kind === 'New' ? 'new' : ''}">${esc(r.label || r.kind)}</div><div class="what">${r.det ? `<b>${esc(r.title)}</b><span class="det">${esc(r.det)}</span>` : esc(r.title)}</div></div>`;
     }
     if (subj.length || gs.length) h += `<div class="item"><div class="kind">Tested today</div><div class="chips">${[...subj, ...gs].map(x => `<span class="chip-s">${esc(x)}</span>`).join('')}</div></div>`;
     h += `</div></section>`;
@@ -235,7 +239,7 @@ function viewToday() {
 }
 
 function weekKey(s) { const d = parse(s); const g = (d.getDay() + 6) % 7; return addDays(s, -g); } // Monday
-function phaseOf(s) { return s <= '2026-10-28' ? 'Subject sweep' : s <= '2026-12-06' ? 'Papers + subject tests' : 'Multi-subject tests + last mocks'; }
+function phaseOf(s) { return s <= '2026-11-16' ? 'Revision blocks + spaced tests' : s <= '2026-11-30' ? 'Spaced tests + mocks' : 'Multi-subject tests + last mocks'; }
 
 function viewPlan() {
   const today = TODAY();
