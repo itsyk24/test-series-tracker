@@ -239,7 +239,7 @@ function viewToday() {
 }
 
 function weekKey(s) { const d = parse(s); const g = (d.getDay() + 6) % 7; return addDays(s, -g); } // Monday
-function phaseOf(s) { return s <= '2026-11-16' ? 'Revision blocks + spaced tests' : s <= '2026-11-30' ? 'Spaced tests + mocks' : 'Multi-subject tests + last mocks'; }
+function phaseOf(s) { return s <= '2026-11-20' ? 'Revision blocks + spaced tests' : s <= '2026-12-01' ? 'Spaced tests + mocks' : 'Multi-subject tests + last mocks'; }
 
 function viewPlan() {
   const today = TODAY();
